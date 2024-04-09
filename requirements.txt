@@ -5,7 +5,10 @@ bitsandbytes
 black
 black[jupyter]
 datasets
-git+https://github.com/huggingface/peft.git
-git+https://github.com/huggingface/transformers.git
+transformers
+peft
 sentencepiece
 gradio
+
+#for sealion
+einops

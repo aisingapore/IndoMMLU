@@ -8,7 +8,6 @@ from transformers import LlamaForCausalLM, LlamaTokenizer, AutoTokenizer, AutoMo
 from tqdm import tqdm
 from numpy import argmax
 import torch
-from sklearn.metrics import accuracy_score
 
 if torch.cuda.is_available():
     device = "cuda"
@@ -69,8 +68,8 @@ def main():
     tokenizer_class = LlamaTokenizer if 'llama' in args.base_model else AutoTokenizer
     model_class = LlamaForCausalLM if 'llama' in args.base_model else AutoModelForCausalLM
 
-    SAVE_FILE = '{args.output_folder}/result_{args.base_model.split("/")[-1]}_{args.by_letter}.csv'
-    tokenizer = tokenizer_class.from_pretrained(args.base_model)
+    SAVE_FILE = f'{args.output_folder}/result_{args.base_model.split("/")[-1]}_{args.by_letter}.csv'
+    tokenizer = tokenizer_class.from_pretrained(args.base_model, trust_remote_code=True)
     
     if 'mt0' in args.base_model:
         model = AutoModelForSeq2SeqLM.from_pretrained(args.base_model, device_map="auto", load_in_8bit="xxl" in args.base_model)
@@ -88,7 +87,7 @@ def main():
             args.lora_weights,
             torch_dtype=torch.float16,
         )
-        SAVE_FILE = '{args.output_folder}/result_{args.lora_weight.split("/")[-1]}_{args.by_letter}.csv'
+        SAVE_FILE = f'{args.output_folder}/result_{args.lora_weight.split("/")[-1]}_{args.by_letter}.csv'
 
     # unwind broken decapoda-research config
     if 'llama' in args.base_model:
@@ -97,8 +96,8 @@ def main():
         model.config.eos_token_id = 2
 
     model.eval()
-    if torch.__version__ >= "2" and sys.platform != "win32":
-        model = torch.compile(model)
+    #if torch.__version__ >= "2" and sys.platform != "win32":
+        #model = torch.compile(model)
     
     
     prompt = get_prompt(args)
