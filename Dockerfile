@@ -7,6 +7,7 @@ RUN apt-get update && \
         git
 
 RUN git clone -b feat-docker https://github.com/aisingapore/IndoMMLU.git indommlu
-RUN pip install -r /workspace/indommlu/requirements.txt
+WORKDIR /workspace/indommlu
+RUN pip install -r requirements.txt
 
-ENTRYPOINT ["/workspace/indommlu/entrypoint.sh"]
+ENTRYPOINT ["entrypoint.sh"]

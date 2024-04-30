@@ -2,4 +2,4 @@
 
 set -euo pipefail
 
-python indommlu/evaluate.py "$@"
+python evaluate.py "$@"
