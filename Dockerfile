@@ -10,4 +10,4 @@ RUN git clone -b feat-docker https://github.com/aisingapore/IndoMMLU.git indomml
 WORKDIR /workspace/indommlu
 RUN pip install -r requirements.txt
 
-ENTRYPOINT ["entrypoint.sh"]
+ENTRYPOINT ["/workspace/indommlu/entrypoint.sh"]
