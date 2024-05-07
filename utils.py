@@ -13,8 +13,9 @@ def softmax(x):
 
 @torch.no_grad()
 def get_logprobs_causal(model, tokenizer, prompt, device):
-    inputs = tokenizer(prompt, return_tensors="pt")
-    if model.config.model_type == 'falcon':
+    inputs = tokenizer(prompt, return_tensors="pt").to(device)
+    # if model.config.model_type == 'falcon':
+    if "token_type_ids" in inputs:
         inputs.pop("token_type_ids")
     input_ids, output_ids = inputs["input_ids"].to(device), inputs["input_ids"][:, 1:].to(device)
     outputs = model(**inputs, labels=input_ids)
@@ -22,7 +23,7 @@ def get_logprobs_causal(model, tokenizer, prompt, device):
     logits = outputs.logits.to(torch.double).to(device)
     output_ids = output_ids.to(logits.get_device()) #in case of paralellism
     logprobs = torch.gather(F.log_softmax(logits, dim=2), 2, output_ids.unsqueeze(2))
-    
+
     return logprobs.mean()
 
 def predict_classification_causal(model, tokenizer, input_text, labels, device):
@@ -50,7 +51,7 @@ def predict_classification_causal_by_letter(model, tokenizer, input_text, labels
 @torch.no_grad()
 def get_logprobs_mt0(model, tokenizer, prompt, device, label_ids=None, label_attn=None):
     inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=1024).to('cuda')
-    
+
     outputs = model(**inputs, decoder_input_ids=model._shift_right(label_ids))
     logits = outputs.logits
 
@@ -62,7 +63,7 @@ def predict_classification_mt0(model, tokenizer, input_text, labels, device):
     list_label_ids = labels_encoded['input_ids'].to('cuda')
     list_label_attn = labels_encoded['attention_mask'].to('cuda')
     probs = [
-        get_logprobs_mt0(model, tokenizer, input_text, device, label_ids.view(1,-1), label_attn.view(1,-1)) 
+        get_logprobs_mt0(model, tokenizer, input_text, device, label_ids.view(1,-1), label_attn.view(1,-1))
           for (label_ids, label_attn) in zip(list_label_ids, list_label_attn)
     ]
     return probs
